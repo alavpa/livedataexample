@@ -1,0 +1,6 @@
+<resources>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="item_padding">15dp</dimen>
+    <dimen name="text_size_desc">27sp</dimen>
+    <dimen name="text_size_title">42sp</dimen>
+</resources>
