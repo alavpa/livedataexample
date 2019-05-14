@@ -28,11 +28,17 @@ class MainActivity : AppCompatActivity() {
         film_list?.layoutManager = LinearLayoutManager(this)
         film_list?.adapter = adapter
 
-        vm.listLiveData.observe(this, Observer {
+        vm.attach(this)
+        vm.observeList {
             adapter.items = it
             adapter.notifyDataSetChanged()
-        })
+        }
 
         vm.load()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        vm.detach()
     }
 }

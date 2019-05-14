@@ -1,6 +1,6 @@
 package com.econocom.livedataexample.viewmodel.base
 
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
 import io.reactivex.Scheduler
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
@@ -14,6 +14,22 @@ open class ViewModelBase : ViewModel(), KoinComponent {
     private val ioThread: Scheduler by inject(named("ioThread"))
     private val mainThread: Scheduler by inject(named("mainThread"))
     private val compositeDisposable: CompositeDisposable by inject()
+
+    var owner: LifecycleOwner? = null
+
+    fun attach(owner: LifecycleOwner) {
+        this.owner = owner
+    }
+
+    fun detach() {
+        this.owner = null
+    }
+
+    fun <T> MutableLiveData<T>.observe(result: (T) -> Unit) {
+        owner?.let { lifeCycleOwner ->
+            this.observe(lifeCycleOwner, Observer { result(it) })
+        }
+    }
 
     fun <T> Single<T>.execute(
         onError: (Throwable) -> Unit = { Timber.e(it) },
@@ -29,5 +45,13 @@ open class ViewModelBase : ViewModel(), KoinComponent {
     override fun onCleared() {
         super.onCleared()
         compositeDisposable.clear()
+    }
+
+    fun <T> removeObservers(vararg liveDatas: LiveData<T>) {
+        owner?.let { lifeCycleOwner ->
+            liveDatas.forEach {
+                it.removeObservers(lifeCycleOwner)
+            }
+        }
     }
 }
